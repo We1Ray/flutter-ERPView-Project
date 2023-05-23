@@ -7,13 +7,13 @@ part 'account_model.g.dart';
 @JsonSerializable()
 class AccountModel extends Equatable {
   final String account_uid; // json 欄位名稱
-  final String account; // json 欄位名稱
   final String name; // json 欄位名稱
+  final String account; // json 欄位名稱
   final String email; // json 欄位名稱
   AccountModel(
       {required this.account_uid,
-      required this.account,
       required this.name,
+      required this.account,
       required this.email}); // required 裡面也要改成
   factory AccountModel.fromJson(Map<String, dynamic> json) =>
       _$AccountModelFromJson(json);
@@ -22,8 +22,8 @@ class AccountModel extends Equatable {
   Map<String, dynamic> toJson() => _$AccountModelToJson(this);
   // 這裡的 _$PostModelToJson(this) 的 PostModel 也要改動，變成  _$XXXToJson(this)
   @override
-  String toString() => "$account_uid $account $name $email";
+  String toString() => "$account_uid $name $account $email";
 
   @override
-  List<Object?> get props => [account_uid, account, name, email];
+  List<Object?> get props => [account_uid, name, account, email];
 }
