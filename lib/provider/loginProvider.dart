@@ -2,48 +2,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/account_model.dart';
 
 class Login {
-  String email;
-  String password;
-  String token;
-  AccountModel? accountModel;
+  AccountModel? account;
 
-  Login(
-      {required this.email,
-      required this.password,
-      this.token = '',
-      this.accountModel});
+  Login({this.account});
 
-  Login copyWith(
-      {String? email, String? password, String? token, AccountModel? account}) {
-    return Login(
-        email: email ?? this.email,
-        password: password ?? this.password,
-        token: token ?? this.token,
-        accountModel: account ?? this.accountModel);
+  Login copyWith({AccountModel? account}) {
+    return Login(account: account ?? this.account);
   }
 }
 
 class LoginNotifier extends StateNotifier<Login> {
   LoginNotifier(Login state) : super(state);
 
-  void setEmail(String email) {
-    state.email = email;
-  }
-
-  void setPassword(String password) {
-    state.password = password;
-  }
-
-  void setToken(String token) {
-    state.token = token;
-  }
-
-  void setAccount(AccountModel accountModel) {
-    state.accountModel = accountModel;
+  void setAccount(AccountModel account) {
+    state.account = account;
   }
 }
 
 final loginProvider = StateNotifierProvider<LoginNotifier, Login>((ref) {
-  return LoginNotifier(
-      Login(email: '', password: '', token: '', accountModel: null));
+  return LoginNotifier(Login(account: null));
 });

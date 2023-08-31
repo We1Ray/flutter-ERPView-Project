@@ -5,8 +5,8 @@ import 'pages/example/register.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'pages/erpWebView.dart';
 
-final String front_ip = 'http://172.20.10.14:3000';
-final String back_ip = 'http://172.20.10.14:8080';
+final String front_ip = '';
+final String back_ip = '';
 final storage = new FlutterSecureStorage();
 
 Future<void> main() async {

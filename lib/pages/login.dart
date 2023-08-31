@@ -185,7 +185,16 @@ class EmailTextBox extends ConsumerWidget {
               borderRadius: BorderRadius.circular(10),
             )),
         onChanged: (value) {
-          ref.read(loginProvider.notifier).setEmail(value);
+          ref.read(loginProvider.notifier).setAccount(AccountModel.fromJson({
+                "account_uid": '',
+                "name": '',
+                "account": '',
+                "email": value,
+                "password": ref.read(loginProvider).account == null
+                    ? ''
+                    : ref.read(loginProvider).account!.password,
+                "token": '',
+              }));
         });
   }
 }
@@ -204,7 +213,16 @@ class PasswordTextBox extends ConsumerWidget {
             borderRadius: BorderRadius.circular(10),
           )),
       onChanged: (value) {
-        ref.read(loginProvider.notifier).setPassword(value);
+        ref.read(loginProvider.notifier).setAccount(AccountModel.fromJson({
+              "account_uid": '',
+              "name": '',
+              "account": '',
+              "email": ref.read(loginProvider).account == null
+                  ? ''
+                  : ref.read(loginProvider).account!.email,
+              "password": value,
+              "token": '',
+            }));
       },
     );
   }
@@ -245,23 +263,20 @@ class LoginButton extends ConsumerWidget {
     var loginInfo = ref.watch(loginProvider);
     void login() async {
       try {
-        var loginAccount = await postApi(back_ip + '/public/login', 'DS',
-            {'email': loginInfo.email, 'password': loginInfo.password});
-
+        var loginAccount = await postApi(back_ip + '/public/login', 'DS', {
+          'email': loginInfo.account!.email,
+          'password': loginInfo.account!.password
+        });
         if (loginAccount['rows'][0] != Null) {
-          ref
-              .read(loginProvider.notifier)
-              .setAccount(AccountModel.fromJson(loginAccount['rows'][0]));
-
           DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
           String now = dateFormat.format(DateTime.now());
 
           var newToken = 'M-' +
-              base64Url.encode(
-                  utf8.encode(loginInfo.accountModel!.account + ';' + now));
+              base64Url
+                  .encode(utf8.encode(loginInfo.account!.account + ';' + now));
           var accessToken = await postApi(
               back_ip + '/public/create_account_access_token', 'DS', {
-            'ldap_id': loginInfo.accountModel!.account,
+            'ldap_id': loginAccount['rows'][0]['account'],
             'access_token': newToken,
             'system_uid': 'SYS_00001',
             'isMobile': 'Y'
@@ -269,18 +284,29 @@ class LoginButton extends ConsumerWidget {
           if (accessToken != Null) {
             await storage.write(key: 'token', value: newToken);
             await storage.write(
-                key: 'acount',
-                value: ref.read(loginProvider).accountModel?.account);
+                key: 'acount', value: loginAccount['rows'][0]['account']);
             await storage.write(
-                key: 'email',
-                value: ref.read(loginProvider).accountModel?.email);
+                key: 'email', value: loginAccount['rows'][0]['email']);
             await storage.write(
-                key: 'uid',
-                value: ref.read(loginProvider).accountModel?.account_uid);
-            ref.read(loginProvider.notifier).setToken(newToken);
+                key: 'uid', value: loginAccount['rows'][0]['account_uid']);
+            ref.read(loginProvider.notifier).setAccount(AccountModel.fromJson({
+                  "account_uid": loginAccount['rows'][0]['account_uid'],
+                  "name": loginAccount['rows'][0]['name'],
+                  "account": loginAccount['rows'][0]['account'],
+                  "email": loginAccount['rows'][0]['email'],
+                  "password": loginAccount['rows'][0]['password'],
+                  "token": newToken,
+                }));
             Navigator.pushNamed(context, 'webview');
           } else {
-            ref.read(loginProvider.notifier).setToken('');
+            ref.read(loginProvider.notifier).setAccount(AccountModel.fromJson({
+                  "account_uid": '',
+                  "name": '',
+                  "account": '',
+                  "email": ref.read(loginProvider).account!.email,
+                  "password": ref.read(loginProvider).account!.password,
+                  "token": '',
+                }));
           }
         } else {
           showNetworkAlertDialog(context, '');

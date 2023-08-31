@@ -12,6 +12,8 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) {
     name: json['name'] as String,
     account: json['account'] as String,
     email: json['email'] as String,
+    password: json['password'] as String,
+    token: json['token'] as String,
   );
 }
 
@@ -21,4 +23,6 @@ Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
       'name': instance.name,
       'account': instance.account,
       'email': instance.email,
+      'password': instance.password,
+      'token': instance.token,
     };

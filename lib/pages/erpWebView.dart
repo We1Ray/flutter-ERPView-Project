@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../main.dart';
+import '../model/account_model.dart';
+import '../provider/loginProvider.dart';
 // #enddocregion platform_imports
 
 class WebViewExample extends ConsumerStatefulWidget {
@@ -17,17 +19,40 @@ class _WebViewExampleState extends ConsumerState<WebViewExample> {
   @override
   void initState() {
     super.initState();
-    _controllerFuture = getToken();
+    _controllerFuture = getToken(ref);
   }
 
-  Future<WebViewController> getToken() async {
+  Future<WebViewController> getToken(WidgetRef ref) async {
     String? token = await storage.read(key: 'token');
     WebViewController controller = new WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..addJavaScriptChannel(
-        "abc",
-        onMessageReceived: (JavaScriptMessage message) {
+        "account",
+        onMessageReceived: (JavaScriptMessage message) async {
+          // Handle message received from JavaScript
+          var eventData = message.message;
+          // Process the received data accordingly
+          if (eventData == 'logout') {
+            ref.read(loginProvider.notifier).setAccount(AccountModel.fromJson({
+                  "account_uid": '',
+                  "name": '',
+                  "account": '',
+                  "email": '',
+                  "password": '',
+                  "token": '',
+                }));
+            await storage.write(key: 'token', value: '');
+            await storage.write(key: 'acount', value: '');
+            await storage.write(key: 'email', value: '');
+            await storage.write(key: 'uid', value: '');
+            Navigator.pushNamed(context, 'login');
+          }
+        },
+      )
+      ..addJavaScriptChannel(
+        "file",
+        onMessageReceived: (JavaScriptMessage message) async {
           // Handle message received from JavaScript
           var eventData = message.message;
           // Process the received data accordingly
@@ -35,7 +60,7 @@ class _WebViewExampleState extends ConsumerState<WebViewExample> {
         },
       )
       ..loadRequest(Uri.parse(front_ip + '/admin/system?mt=' + token!));
-
+      print(Uri.parse(front_ip + '/admin/system?mt=' + token));
     return controller;
   }
 
